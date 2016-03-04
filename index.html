@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Service Statuses</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/custom.css">
+    <script src="js/vue.min.js"></script>
+    <script src="js/vue-resource.min.js"></script>
+    <link href='https://fonts.googleapis.com/css?family=VT323' rel='stylesheet' type='text/css'>
+</head>
+
+<body>
+
+<div id="app" class="main-content">
+    <div class="container">
+        <br/>
+        <br/>
+        <h1 class="text-center zoona-heading">Service Status Dashboard</h1>
+        <br/>
+        <table class="status-table">
+            <tr>
+                <th><strong>Service</strong></th>
+                <th><strong>Notes</strong></th>
+            </tr>
+            <tr v-for="item in services">
+                <td style="width:30%">
+                    <div class="row">
+                        <div class="col-xs-2 led-cell">
+                            <div v-if="item.status === 'UP'" class="led led-green"></div>
+                            <div v-if="item.status === 'DOWN'" class="led led-red"></div>
+                            <div v-if="['DOWN','UP'].indexOf(item.status) < 0" class="led"></div>
+                        </div><!--
+                        --><div class="col-xs-10 comment-cell">
+                            <strong v-if="item.status === 'UP'">{{ item.name }}</strong>
+                            <strong v-if="item.status === 'DOWN'" style="color: #D01B1B">{{ item.name }}</strong>
+                            <strong v-if="['DOWN','UP'].indexOf(item.status) < 0">{{ item.name }}</strong>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    {{ item.comment }}
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div class="footer" id="footer">
+    <div class="container space-container text-center">
+        <div id="space-invader"></div>
+    </div>
+</div>
+
+</body>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            message: 'Hello Vue.js!'
+        },
+        ready: function () {
+            this.$http({
+                        url: 'https://spreadsheets.google.com/feeds/list/1VhajDP368fI6U_gouTDWNlGz2eAXReo4xbI-fLFboTY/1/public/basic?alt=json',
+                        method: 'GET'
+                    })
+                    .then(function (response) {
+                        var services = [];
+                        response.data.feed.entry.forEach(function (item) {
+                            var service = {
+                                name: item.title.$t,
+                                status: item.content.$t.split(',')[0].split(':')[1].trim().toUpperCase(),
+                                comment: item.content.$t.split(',')[1].split(':')[1].trim()
+                            };
+                            services.push(service);
+                        });
+                        this.$set('services', services.sort(function (a, b) {
+                            return (a.status > b.status)
+                        }));
+                    }, function (response) {
+                        console.log("Catastrophic error! Call the Ghostbusters.")
+                    });
+        }
+    })
+</script>
+
+</html>

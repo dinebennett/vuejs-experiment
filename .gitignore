@@ -1,0 +1,9 @@
+# Created by .ignore support plugin (hsz.mobi)
+/node_modules
+/dist
+/.tmp
+/.sass-cache
+/bower_components
+/.idea
+npm-debug.log
+*.tar.gz
